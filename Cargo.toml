@@ -1,6 +1,3 @@
 [workspace]
-members = [
-    "signpost",
-    "signpost_derive",
-    "signpost_tests",
-]
+members = ["signpost", "signpost_tests"]
+resolver = "2"

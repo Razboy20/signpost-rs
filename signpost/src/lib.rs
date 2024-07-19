@@ -1,10 +1,11 @@
 #![warn(missing_docs)]
 
 //! Signpost library for macOS and iOS
-//! 
+//!
 //! See https://github.com/mhallin/signpost-rs
 
-pub use signpost_derive::{begin_interval, const_poi_logger, emit_event};
+/// Macros for the `signpost` crate
+pub mod macros;
 
 mod sys {
     use std::{ffi::c_void, os::raw::c_char};
@@ -21,8 +22,8 @@ mod sys {
     pub const SIGNPOST_TYPE_INTERVAL_END: os_signpost_type_t = 2;
 
     extern "C" {
-        pub static mut __dso_handle: usize;
-        pub static mut _os_log_default: usize;
+        pub static mut __dso_handle: c_void;
+        pub static mut _os_log_default: c_void;
 
         #[cfg(all(
             not(feature = "disable-signposts"),
@@ -55,6 +56,7 @@ mod sys {
 
 use std::{
     ffi::CStr,
+    ptr::addr_of_mut,
     sync::{
         atomic::{AtomicUsize, Ordering},
         Once,
@@ -147,7 +149,7 @@ impl OsLog {
         unsafe {
             if sys::os_signpost_enabled(log) {
                 sys::_os_signpost_emit_with_name_impl(
-                    (&mut sys::__dso_handle) as *mut usize as *mut _,
+                    addr_of_mut!(sys::__dso_handle),
                     log,
                     sys::SIGNPOST_TYPE_EVENT,
                     id,
@@ -184,7 +186,7 @@ impl OsLog {
         unsafe {
             if sys::os_signpost_enabled(log_handle) {
                 sys::_os_signpost_emit_with_name_impl(
-                    (&mut sys::__dso_handle) as *mut usize as *mut _,
+                    addr_of_mut!(sys::__dso_handle),
                     log_handle,
                     sys::SIGNPOST_TYPE_INTERVAL_BEGIN,
                     id,
@@ -253,7 +255,7 @@ impl<'a> Drop for SignpostInterval<'a> {
         unsafe {
             if sys::os_signpost_enabled(log_handle) {
                 sys::_os_signpost_emit_with_name_impl(
-                    (&mut sys::__dso_handle) as *mut usize as *mut _,
+                    addr_of_mut!(sys::__dso_handle),
                     log_handle,
                     sys::SIGNPOST_TYPE_INTERVAL_END,
                     self.id,

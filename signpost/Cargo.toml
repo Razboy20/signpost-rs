@@ -7,6 +7,3 @@ license = "MIT"
 [features]
 default = []
 disable-signposts = []
-
-[dependencies]
-signpost_derive = { path = "../signpost_derive" }
